@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import selloFechaImage from './images/sello_fecha.png';
@@ -28,7 +28,7 @@ function App() {
     }
   };
 
-  const calcularCoordenadas = (page, selloFechaWidth, selloFechaHeight, selloFolioWidth, selloFolioHeight) => {
+  const calcularCoordenadas = (page, selloFechaWidth, selloFechaHeight, selloFolioWidth, selloFolioHeight, pageCount, pageIndex) => {
     const { width, height } = page.getSize();
 
     let selloX, selloY, fechaX, fechaY, folioX, folioY;
@@ -41,7 +41,10 @@ function App() {
     folioX = width - selloFolioWidth - 20;
     folioY = 20;
 
-    return { selloX, selloY, fechaX, fechaY, folioX, folioY };
+    // Calcular el número de folio en orden descendente
+    const folioNumero = pageCount - pageIndex;
+
+    return { selloX, selloY, fechaX, fechaY, folioX, folioY, folioNumero };
   };
 
   const agregarTextoAlPDF = async (file, fecha) => {
@@ -75,12 +78,15 @@ function App() {
         fechaY,
         folioX,
         folioY,
+        folioNumero,
       } = calcularCoordenadas(
         page,
         selloFechaWidth,
         selloFechaHeight,
         selloFolioWidth,
-        selloFolioHeight
+        selloFolioHeight,
+        pageCount,
+        i
       );
 
       const selloFechaImageBytes = await fetch(selloFechaImage).then((res) => res.arrayBuffer());
@@ -111,7 +117,7 @@ function App() {
         height: selloFolioHeight,
       });
 
-      page.drawText(`${i + 1}`, {
+      page.drawText(`${folioNumero}`, {
         x: folioX + 75,
         y: folioY + 10,
         size: 12,
