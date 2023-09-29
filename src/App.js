@@ -70,7 +70,7 @@ function App() {
 
     for (let i = 0; i < pageCount; i++) {
       const page = pdfDoc.getPage(i);
-
+    
       const {
         selloX,
         selloY,
@@ -88,35 +88,17 @@ function App() {
         pageCount,
         i
       );
-
-      const selloFechaImageBytes = await fetch(selloFechaImage).then((res) => res.arrayBuffer());
+    
       const selloFolioImageBytes = await fetch(selloFolioImage).then((res) => res.arrayBuffer());
-
-      const selloFechaImageXObject = await pdfDoc.embedPng(selloFechaImageBytes);
       const selloFolioImageXObject = await pdfDoc.embedPng(selloFolioImageBytes);
-
-      page.drawImage(selloFechaImageXObject, {
-        x: selloX,
-        y: selloY,
-        width: selloFechaWidth,
-        height: selloFechaHeight,
-      });
-
-      page.drawText(`${formattedDateWithMonth}`, {
-        x: fechaX,
-        y: fechaY,
-        size: 9,
-        font: helveticaFont,
-        color: rgb(0, 0, 0),
-      });
-
+    
       page.drawImage(selloFolioImageXObject, {
         x: folioX,
         y: folioY,
         width: selloFolioWidth,
         height: selloFolioHeight,
       });
-
+    
       page.drawText(`${folioNumero}`, {
         x: folioX + 75,
         y: folioY + 10,
@@ -124,6 +106,27 @@ function App() {
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
+    
+      // Verificar si es la primera página y agregar selloFecha y fecha
+      if (i === 0) {
+        const selloFechaImageBytes = await fetch(selloFechaImage).then((res) => res.arrayBuffer());
+        const selloFechaImageXObject = await pdfDoc.embedPng(selloFechaImageBytes);
+    
+        page.drawImage(selloFechaImageXObject, {
+          x: selloX,
+          y: selloY,
+          width: selloFechaWidth,
+          height: selloFechaHeight,
+        });
+    
+        page.drawText(`${formattedDateWithMonth}`, {
+          x: fechaX,
+          y: fechaY,
+          size: 9,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+      }
     }
 
     return pdfDoc.save();
